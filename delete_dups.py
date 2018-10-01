@@ -2,10 +2,18 @@
 Fast and easy script for deleting unnecessary duplicate files in a directory
 """
 
+BAR_LENGTH = 75
+
 import os
 import sys
 import hashlib
 
+def progressBar(filesScanned, totalFiles):
+	filledLength = int(round(BAR_LENGTH * filesScanned / float(totalFiles)))
+	percents = round(100.0 * filesScanned / float(totalFiles), 1)
+	bar = '#' * filledLength + '-' * (BAR_LENGTH - filledLength)
+	sys.stdout.write('[%s] %s%s ...%s\r' % (bar, percents, '%', ", %d Files scanned" % (filesScanned)))
+	sys.stdout.flush()
 
 def findDups(directoryName):
 	if not os.path.isdir(directoryName):
@@ -23,17 +31,16 @@ def findDups(directoryName):
 				duplicates.append(foundFileName)
 			else:
 				filesHashes.append(fileHash)
-		print "\rScanned %d out of %d files" % (i+1, filesAmount),
+		progressBar(i+1, filesAmount)
 	print
 	return duplicates
-
 
 def delDups(duplicates, directoryName):
 	if len(duplicates) == 0:
 		print "No unnecessary files were found"
 		return
 
-	userAns = raw_input("Found %d unnecessary files: %s\nDo you wish to remove them? (y/n) " % (len(duplicates), duplicates))
+	userAns = raw_input("Found %d unnecessary files\nDo you wish to remove them? (y/n) " % len(duplicates))
 	if userAns == "y":
 		for dupFile in duplicates:
 			os.remove("%s\\%s" % (directoryName, dupFile))
